@@ -17,7 +17,7 @@ class DelayReportTest extends TestCase
 {
     use DatabaseMigrations;
 
-    public function test_new_estimate_on_order_that_has_trip()
+    public function test_delay_request_on_order_that_has_trip()
     {
         //prepare data
         $user = User::factory()
