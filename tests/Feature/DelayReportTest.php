@@ -20,9 +20,7 @@ class DelayReportTest extends TestCase
     public function test_delay_request_on_order_that_has_trip()
     {
         //prepare data
-        $user = User::factory()
-            ->client()
-            ->create();
+        $user = $this->createClient();
 
         $order = Order::factory()
             ->for($user, 'client')
@@ -39,9 +37,7 @@ class DelayReportTest extends TestCase
 
         //action
         $response = $this->actingAs($user)
-            ->post('/api/delay-report/'. $order->id, [
-                'orderId' => $order->id,
-            ]);
+            ->post('/api/delay-report/'. $order->id);
 
 
         //asserts
@@ -64,5 +60,32 @@ class DelayReportTest extends TestCase
             'order_id' => $order->id,
             'time' => 15
         ]);
+    }
+
+    public function test_a_client_cannot_send_delay_request_on_other_client_order()
+    {
+        $client = $this->createClient();
+        $otherClient = $this->createClient();
+        $order = Order::factory()
+            ->for($otherClient, 'client')
+            ->has(Trip::factory()->validToNewEstimate())
+            ->create();
+
+
+        $response = $this->actingAs($client)
+            ->post('/api/delay-report/'. $order->id);
+
+        $response->assertStatus(403);
+    }
+        
+
+    /**
+     * @return mixed
+     */
+    public function createClient(): mixed
+    {
+        return User::factory()
+            ->client()
+            ->create();
     }
 }

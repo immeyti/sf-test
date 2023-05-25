@@ -17,12 +17,16 @@ class DelayController extends Controller
 
     /**
      * @param Order $order
-     * @return OrderResource
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function delayReport(Order $order): OrderResource
+    public function delayReport(Order $order): \Illuminate\Http\JsonResponse
     {
+        if (request()->user()->cannot('delayReport', $order)) {
+           return $this->returnError(403);
+        }
+
         $this->orderService->delay($order);
 
-        return OrderResource::make($order);
+        return $this->returnSuccess(data: OrderResource::make($order));
     }
 }
