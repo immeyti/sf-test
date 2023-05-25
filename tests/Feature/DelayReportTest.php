@@ -108,6 +108,69 @@ class DelayReportTest extends TestCase
         ]);
     }
 
+    public function test_delay_request_on_order_that_has_not_trip()
+    {
+        $user = $this->createClient();
+        $order = Order::factory()
+            ->for($user, 'client')
+            ->create([
+                'delivery_time' => 50
+            ]);
+
+        $this->travel(52)->minutes();
+
+
+        //action
+        $response = $this->actingAs($user)
+            ->post('/api/delay-report/'. $order->id);
+
+        // update order delivery_time
+        $this->assertDatabaseHas(Order::class, [
+            'id' => $order->id,
+            'delivery_time' => 50
+        ]);
+
+        // insert a row in delay_reports
+        $this->assertDatabaseHas(DelayReports::class, [
+            'order_id' => $order->id,
+            'time' => 0
+        ]);
+
+        // TODO:: write some assertion to check queue
+    }
+
+    public function test_delay_request_on_order_that_has_not_valid_trip_status_to_calculate_new_estimate()
+    {
+        $user = $this->createClient();
+        $order = Order::factory()
+            ->for($user, 'client')
+            ->has(Trip::factory()->notValidToNewEstimate())
+            ->create([
+                'delivery_time' => 50
+            ]);
+
+        $this->travel(52)->minutes();
+
+
+        //action
+        $response = $this->actingAs($user)
+            ->post('/api/delay-report/'. $order->id);
+
+        // update order delivery_time
+        $this->assertDatabaseHas(Order::class, [
+            'id' => $order->id,
+            'delivery_time' => 50
+        ]);
+
+        // insert a row in delay_reports
+        $this->assertDatabaseHas(DelayReports::class, [
+            'order_id' => $order->id,
+            'time' => 0
+        ]);
+
+        // TODO:: write some assertion to check queue
+    }
+
     /**
      * @return mixed
      */

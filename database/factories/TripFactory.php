@@ -30,4 +30,13 @@ class TripFactory extends Factory
             ];
         });
     }
+
+    public function notValidToNewEstimate(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'status' => TripStatusEnum::AT_VENDOR,
+            ];
+        });
+    }
 }

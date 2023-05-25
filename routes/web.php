@@ -1,8 +1,7 @@
 <?php
 
-use App\Services\DeliveryEstimatorService;
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\Redis;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,5 +14,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+
+
+// Define our queue name
+    $queueName = 'fifo';
+
+// Put some items in our queue
+// You can run this code outside your long-running worker
+//    Redis::rpush($queueName, 'item1');
+//    Redis::rpush($queueName, json_encode(['order' => 'rer']));
+
+    dd(Redis::LRANGE($queueName, 0, -1), json_decode(Redis::lpop($queueName)));
 });

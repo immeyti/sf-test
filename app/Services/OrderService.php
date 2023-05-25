@@ -8,6 +8,7 @@ use App\Exceptions\FailedToGetDeliveryEstimate;
 use App\Exceptions\OrderDeliveryTimeIsNotEnded;
 use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Redis;
 
 class OrderService
 {
@@ -29,16 +30,17 @@ class OrderService
         }
 
         try {
-
-            if (in_array($order->trip->status, TripStatusEnum::getValidStatusListToNewEstimate())){
+            if (in_array($order->trip?->status, TripStatusEnum::getValidStatusListToNewEstimate())){
                 $newEstimate = $this->deliveryEstimator->getNewEstimate();
 
                 $order->increment('delivery_time', $newEstimate);
-
-                OrderDelayed::dispatch($order, $newEstimate);
-
-                return $order;
+            } else {
+                Redis::rpush('fifo', json_encode($order));
+                $newEstimate = 0;
             }
+
+            OrderDelayed::dispatch($order, $newEstimate);
+            return $order;
         } catch (FailedToGetDeliveryEstimate $e) {
 
         }
