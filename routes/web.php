@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\DeliveryEstimatorService;
 use Illuminate\Support\Facades\Route;
 
 /*

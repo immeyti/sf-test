@@ -37,7 +37,7 @@ class UserFactory extends Factory
         ]);
     }
 
-    public function client(): static
+    public function client(): Factory
     {
         return $this->state(function (array $attributes) {
             return [
