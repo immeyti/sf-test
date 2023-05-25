@@ -35,6 +35,8 @@ class DelayReportTest extends TestCase
                 Http::response(["status" => true, "data" => [ "eta" => 15 ]], 200),
         ]);
 
+        $this->travel(52)->minutes();
+
         //action
         $response = $this->actingAs($user)
             ->post('/api/delay-report/'. $order->id);
@@ -77,7 +79,34 @@ class DelayReportTest extends TestCase
 
         $response->assertStatus(403);
     }
-        
+
+    public function test_delay_process_cannot_start_before_order_delivery_time()
+    {
+        //prepare data
+        $user = $this->createClient();
+        $order = Order::factory()
+            ->for($user, 'client')
+            ->has(Trip::factory()->validToNewEstimate())
+            ->create([
+                'delivery_time' => 50
+            ]);
+
+
+        //action
+        $response = $this->actingAs($user)
+            ->post('/api/delay-report/'. $order->id);
+
+        $response->assertStatus(400);
+
+        // insert a row in delay_reports
+        $this->assertDatabaseCount(DelayReports::class, 0);
+
+        // update order delivery_time
+        $this->assertDatabaseHas(Order::class, [
+            'id' => $order->id,
+            'delivery_time' => 50
+        ]);
+    }
 
     /**
      * @return mixed

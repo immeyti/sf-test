@@ -5,7 +5,9 @@ namespace App\Services;
 use App\enums\TripStatusEnum;
 use App\Events\OrderDelayed;
 use App\Exceptions\FailedToGetDeliveryEstimate;
+use App\Exceptions\OrderDeliveryTimeIsNotEnded;
 use App\Models\Order;
+use Carbon\Carbon;
 
 class OrderService
 {
@@ -22,7 +24,12 @@ class OrderService
      */
     public function delay(Order $order)
     {
+        if (!$this->isValidToDelayRequest($order)) {
+            throw new OrderDeliveryTimeIsNotEnded();
+        }
+
         try {
+
             if (in_array($order->trip->status, TripStatusEnum::getValidStatusListToNewEstimate())){
                 $newEstimate = $this->deliveryEstimator->getNewEstimate();
 
@@ -45,5 +52,15 @@ class OrderService
     public function addDelay(Order $order, int $delayTime): void
     {
         $order->addDelay($delayTime);
+    }
+
+
+    /**
+     * @param Order $order
+     * @return bool
+     */
+    public function isValidToDelayRequest(Order $order): bool
+    {
+        return $order->expected_delivery_time < now();
     }
 }

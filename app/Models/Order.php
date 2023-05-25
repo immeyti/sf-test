@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -39,5 +40,10 @@ class Order extends Model
         ]);
 
         return $this;
+    }
+
+    protected function getExpectedDeliveryTimeAttribute()
+    {
+        return $this->created_at->addMinutes($this->delivery_time);
     }
 }
