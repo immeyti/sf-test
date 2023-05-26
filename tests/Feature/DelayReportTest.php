@@ -39,7 +39,7 @@ class DelayReportTest extends TestCase
 
         //action
         $response = $this->actingAs($user)
-            ->post('/api/delay-report/'. $order->id);
+            ->post('/api/clients/delay-report/'. $order->id);
 
 
         //asserts
@@ -75,7 +75,7 @@ class DelayReportTest extends TestCase
 
 
         $response = $this->actingAs($client)
-            ->post('/api/delay-report/'. $order->id);
+            ->post('/api/clients/delay-report/'. $order->id);
 
         $response->assertStatus(403);
     }
@@ -94,7 +94,7 @@ class DelayReportTest extends TestCase
 
         //action
         $response = $this->actingAs($user)
-            ->post('/api/delay-report/'. $order->id);
+            ->post('/api/clients/delay-report/'. $order->id);
 
         $response->assertStatus(400);
 
@@ -122,7 +122,7 @@ class DelayReportTest extends TestCase
 
         //action
         $response = $this->actingAs($user)
-            ->post('/api/delay-report/'. $order->id);
+            ->post('/api/clients/delay-report/'. $order->id);
 
         // update order delivery_time
         $this->assertDatabaseHas(Order::class, [
@@ -154,7 +154,7 @@ class DelayReportTest extends TestCase
 
         //action
         $response = $this->actingAs($user)
-            ->post('/api/delay-report/'. $order->id);
+            ->post('/api/clients/delay-report/'. $order->id);
 
         // update order delivery_time
         $this->assertDatabaseHas(Order::class, [

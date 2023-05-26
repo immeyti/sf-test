@@ -7,54 +7,57 @@ use App\Events\OrderDelayed;
 use App\Exceptions\FailedToGetDeliveryEstimate;
 use App\Exceptions\OrderDeliveryTimeIsNotEnded;
 use App\Models\Order;
-use Carbon\Carbon;
+use App\Services\EstimatorService\DeliveryEstimatorServiceInterface;
 use Illuminate\Support\Facades\Redis;
 
 class OrderService
 {
-    private DeliveryEstimatorService $deliveryEstimator;
 
-    public function __construct()
-    {
-        $this->deliveryEstimator = new DeliveryEstimatorService();
-    }
+    public function __construct(
+      private readonly DeliveryEstimatorServiceInterface $deliveryEstimator
+    ) {}
 
     /**
      * @param Order $order
      * @return Order
      * @throws OrderDeliveryTimeIsNotEnded
      */
-    public function delay(Order $order)
+    public function delayReport(Order $order)
     {
-        if (!$this->isValidToDelayRequest($order)) {
+        if (!$this->isValidToDelayReportRequest($order)) {
             throw new OrderDeliveryTimeIsNotEnded();
         }
 
         try {
-            if (in_array($order->trip?->status, TripStatusEnum::getValidStatusListToNewEstimate())){
-                $newEstimate = $this->deliveryEstimator->getNewEstimate();
+            if ($this->orderHasActiveTrip($order)){
+                $newEstimate = $this->deliveryEstimator->getEstimate($order);
 
                 $order->increment('delivery_time', $newEstimate);
             } else {
-                Redis::rpush('fifo', json_encode($order)); //TODO:: creat a service to handle queue
+                //TODO::
+                Redis::rpush('order-delay-report', json_encode($order)); //TODO:: creat a service to handle queue
                 $newEstimate = 0;
             }
 
-            OrderDelayed::dispatch($order, $newEstimate);
+            OrderDelayed::dispatch($order, $newEstimate); // TODO::
             return $order;
         } catch (FailedToGetDeliveryEstimate $e) {
-
+            // TODO:: handle ...
         }
     }
 
     /**
      * @param Order $order
      * @param int $delayTime
-     * @return void
+     * @return Order
      */
-    public function addDelay(Order $order, int $delayTime): void
+    public function addDelayReport(Order $order, int $delayTime): Order
     {
-        $order->addDelay($delayTime);
+        $order->delayReports()->create([
+            'time' => $delayTime
+        ]);
+
+        return $order;
     }
 
 
@@ -62,8 +65,17 @@ class OrderService
      * @param Order $order
      * @return bool
      */
-    public function isValidToDelayRequest(Order $order): bool
+    public function isValidToDelayReportRequest(Order $order): bool
     {
         return $order->expected_delivery_time < now();
+    }
+
+    /**
+     * @param Order $order
+     * @return bool
+     */
+    public function orderHasActiveTrip(Order $order): bool
+    {
+        return in_array($order->trip?->status, TripStatusEnum::getValidStatusListToNewEstimate());
     }
 }

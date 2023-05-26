@@ -9,21 +9,18 @@ use Illuminate\Queue\InteractsWithQueue;
 
 class StoreDelayReport
 {
-    private OrderService $orderService;
-
     /**
      * Create the event listener.
      */
-    public function __construct()
-    {
-        $this->orderService = new OrderService();
-    }
+    public function __construct(
+        private readonly OrderService $orderService
+    ) {}
 
     /**
      * Handle the event.
      */
     public function handle(OrderDelayed $event): void
     {
-        $this->orderService->addDelay($event->order, $event->newEstimate);
+        $this->orderService->addDelayReport($event->order, $event->newEstimate);
     }
 }

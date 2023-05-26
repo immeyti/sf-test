@@ -24,22 +24,9 @@ class Order extends Model
         return $this->belongsTo(User::class, 'client_id');
     }
 
-    public function delays(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function delayReports(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(DelayReport::class);
-    }
-
-    /**
-     * @param $delayTime int
-     * @return Order
-     */
-    public function addDelay(int $delayTime): static
-    {
-        $this->delays()->create([
-            'time' => $delayTime
-        ]);
-
-        return $this;
     }
 
     protected function getExpectedDeliveryTimeAttribute()
