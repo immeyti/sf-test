@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\DelayController;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Client\DelayController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,5 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::middleware('auth:sanctum')->group(function() {
+    Route::post('/delay-report/{order}', [DelayController::class, 'storeDelayReport']);
+});
+
 Route::middleware('auth:sanctum')
-    ->post('/delay-report/{order}', [DelayController::class, 'delayReport']);
+    ->post('/assign-delay-report', [DelayController::class, 'delayAssign']);

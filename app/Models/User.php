@@ -44,4 +44,13 @@ class User extends Authenticatable
         'password' => 'hashed',
         'type' => UserTypeEnum::class
     ];
+
+    public function delayReports()
+    {
+        return $this->belongsToMany(
+            DelayReport::class,
+            'delay_reports_agents',
+            'agent_id',
+            'delay_report_id');
+    }
 }

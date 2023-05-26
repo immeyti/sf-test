@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class FailedToGetDeliveryEstimate extends Exception
+class FailedToGetDeliveryEstimate extends CustomException
 {
 
 }

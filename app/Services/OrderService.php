@@ -21,7 +21,8 @@ class OrderService
 
     /**
      * @param Order $order
-     * @return int|void
+     * @return Order
+     * @throws OrderDeliveryTimeIsNotEnded
      */
     public function delay(Order $order)
     {
@@ -35,7 +36,7 @@ class OrderService
 
                 $order->increment('delivery_time', $newEstimate);
             } else {
-                Redis::rpush('fifo', json_encode($order));
+                Redis::rpush('fifo', json_encode($order)); //TODO:: creat a service to handle queue
                 $newEstimate = 0;
             }
 

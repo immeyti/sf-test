@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 
 use App\Events\OrderDelayed;
-use App\Models\DelayReports;
+use App\Models\DelayReport;
 use App\Models\Order;
 use App\Models\Trip;
 use App\Models\User;
@@ -58,7 +58,7 @@ class DelayReportTest extends TestCase
         ]);
 
         // insert a row in delay_reports
-        $this->assertDatabaseHas(DelayReports::class, [
+        $this->assertDatabaseHas(DelayReport::class, [
             'order_id' => $order->id,
             'time' => 15
         ]);
@@ -99,7 +99,7 @@ class DelayReportTest extends TestCase
         $response->assertStatus(400);
 
         // insert a row in delay_reports
-        $this->assertDatabaseCount(DelayReports::class, 0);
+        $this->assertDatabaseCount(DelayReport::class, 0);
 
         // update order delivery_time
         $this->assertDatabaseHas(Order::class, [
@@ -131,7 +131,7 @@ class DelayReportTest extends TestCase
         ]);
 
         // insert a row in delay_reports
-        $this->assertDatabaseHas(DelayReports::class, [
+        $this->assertDatabaseHas(DelayReport::class, [
             'order_id' => $order->id,
             'time' => 0
         ]);
@@ -163,21 +163,11 @@ class DelayReportTest extends TestCase
         ]);
 
         // insert a row in delay_reports
-        $this->assertDatabaseHas(DelayReports::class, [
+        $this->assertDatabaseHas(DelayReport::class, [
             'order_id' => $order->id,
             'time' => 0
         ]);
 
         // TODO:: write some assertion to check queue
-    }
-
-    /**
-     * @return mixed
-     */
-    public function createClient(): mixed
-    {
-        return User::factory()
-            ->client()
-            ->create();
     }
 }

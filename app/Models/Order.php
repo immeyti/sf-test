@@ -26,7 +26,7 @@ class Order extends Model
 
     public function delays(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(DelayReports::class);
+        return $this->hasMany(DelayReport::class);
     }
 
     /**
