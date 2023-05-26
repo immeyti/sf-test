@@ -8,13 +8,14 @@ use App\Exceptions\FailedToGetDeliveryEstimate;
 use App\Exceptions\OrderDeliveryTimeIsNotEnded;
 use App\Models\Order;
 use App\Services\EstimatorService\DeliveryEstimatorServiceInterface;
-use Illuminate\Support\Facades\Redis;
+use App\Services\QueueService\DelayReportQueueService;
 
 class OrderService
 {
 
     public function __construct(
-      private readonly DeliveryEstimatorServiceInterface $deliveryEstimator
+        private readonly DeliveryEstimatorServiceInterface $deliveryEstimator,
+        private readonly DelayReportQueueService $delayReportQueueService
     ) {}
 
     /**
@@ -22,7 +23,7 @@ class OrderService
      * @return Order
      * @throws OrderDeliveryTimeIsNotEnded
      */
-    public function delayReport(Order $order)
+    public function delayReport(Order $order): Order
     {
         if (!$this->isValidToDelayReportRequest($order)) {
             throw new OrderDeliveryTimeIsNotEnded();
@@ -34,8 +35,7 @@ class OrderService
 
                 $order->increment('delivery_time', $newEstimate);
             } else {
-                //TODO::
-                Redis::rpush('order-delay-report', json_encode($order)); //TODO:: creat a service to handle queue
+                $this->delayReportQueueService->enqueue($order);
                 $newEstimate = 0;
             }
 
