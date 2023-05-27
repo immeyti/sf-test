@@ -3,14 +3,18 @@
 namespace Tests\Feature;
 
 
+use App\enums\DelayReportStatusEnum;
 use App\Events\OrderDelayed;
 use App\Models\DelayReport;
 use App\Models\Order;
 use App\Models\Trip;
 use App\Models\User;
+use App\Services\QueueService\DelayReportQueueService;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Http;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 class DelayReportTest extends TestCase
@@ -118,6 +122,37 @@ class DelayReportTest extends TestCase
             ]);
 
         $this->travel(52)->minutes();
+        $this->mockDelayReportQueueEnqueueMethod();
+
+        //action
+        $response = $this->actingAs($user)
+            ->post('/api/clients/delay-report/'. $order->id);
+
+        // update order delivery_time
+        $this->assertDatabaseHas(Order::class, [
+            'id' => $order->id,
+            'delivery_time' => 50
+        ]);
+
+        // insert a row in delay_reports
+        $this->assertDatabaseHas(DelayReport::class, [
+            'order_id' => $order->id,
+            'time' => 0
+        ]);
+    }
+
+    public function test_delay_request_on_order_that_has_not_valid_trip_status_to_calculate_new_estimate()
+    {
+        $user = $this->createClient();
+        $order = Order::factory()
+            ->for($user, 'client')
+            ->has(Trip::factory()->notValidToNewEstimate())
+            ->create([
+                'delivery_time' => 50
+            ]);
+
+        $this->mockDelayReportQueueEnqueueMethod();
+        $this->travel(52)->minutes();
 
 
         //action
@@ -139,35 +174,29 @@ class DelayReportTest extends TestCase
         // TODO:: write some assertion to check queue
     }
 
-    public function test_delay_request_on_order_that_has_not_valid_trip_status_to_calculate_new_estimate()
+    public function test_should_not_add_a_delay_report_that_already_is_processing_to_queue()
     {
-        $user = $this->createClient();
+        $client = $this->createClient();
+        $agent = $this->createAgent();
         $order = Order::factory()
-            ->for($user, 'client')
+            ->for($client, 'client')
             ->has(Trip::factory()->notValidToNewEstimate())
-            ->create([
-                'delivery_time' => 50
-            ]);
+            ->create();
+        $delayReport = DelayReport::factory()
+            ->for($order)
+            ->create();
+        $agent->delayReports()->attach($delayReport);
 
-        $this->travel(52)->minutes();
-
+        $this->mock(DelayReportQueueService::class, function (MockInterface $mock) {
+            $mock->shouldNotReceive('enqueue');
+        });
 
         //action
-        $response = $this->actingAs($user)
+        $response = $this->actingAs($client)
             ->post('/api/clients/delay-report/'. $order->id);
 
-        // update order delivery_time
-        $this->assertDatabaseHas(Order::class, [
-            'id' => $order->id,
-            'delivery_time' => 50
-        ]);
+        $response->assertStatus(200);
 
-        // insert a row in delay_reports
-        $this->assertDatabaseHas(DelayReport::class, [
-            'order_id' => $order->id,
-            'time' => 0
-        ]);
-
-        // TODO:: write some assertion to check queue
+        $this->assertDatabaseCount('delay_reports_agents', 1);
     }
 }

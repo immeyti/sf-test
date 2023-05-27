@@ -4,6 +4,7 @@ namespace App\Services\QueueService;
 
 class DelayReportQueueService implements QueueServiceInterface
 {
+//    TODO:: this class should get DelayReportId and return DelayReport object
     public function __construct(
         private readonly QueueStrategyInterface $queueStrategy,
         private readonly string $queueName = 'delay-reports'
@@ -13,8 +14,8 @@ class DelayReportQueueService implements QueueServiceInterface
         return $this->queueStrategy->enqueue($this->queueName, json_encode($data));
     }
 
-    public function dequeue($queue): ?object
+    public function dequeue(): ?object
     {
-        return json_decode($this->queueStrategy->dequeue($queue));
+        return json_decode($this->queueStrategy->dequeue($this->queueName));
     }
 }
