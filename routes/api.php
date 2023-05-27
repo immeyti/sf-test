@@ -1,7 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Client\OrderController;
-use App\Http\Controllers\Agent\OrderController as AgentOrderController;
+use App\Http\Controllers\Admin\OrderController as AgentOrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,3 +20,5 @@ Route::middleware('auth:sanctum')->group(function() {
     Route::post('clients/delay-report/{order}', [OrderController::class, 'delayReport']);
     Route::post('admin/assign-delay-report', AgentOrderController::class);
 });
+
+Route::get('/admin/vendor-delay-report', ReportController::class);

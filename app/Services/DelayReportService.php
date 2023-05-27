@@ -7,7 +7,6 @@ use App\Exceptions\OrderDelayReportIsProcessingException;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\QueueService\DelayReportQueueService;
-use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class DelayReportService
@@ -36,5 +35,4 @@ class DelayReportService
         // TODO:: we should have a method to dequeue by index or value
         $this->delayReportQueueService->dequeue();
     }
-
 }

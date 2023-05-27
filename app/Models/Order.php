@@ -33,4 +33,9 @@ class Order extends Model
     {
         return $this->created_at->addMinutes($this->delivery_time);
     }
+
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class);
+    }
 }

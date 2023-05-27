@@ -53,4 +53,9 @@ class User extends Authenticatable
             'agent_id',
             'delay_report_id')->withPivot('status');
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'client_id');
+    }
 }
