@@ -15,4 +15,9 @@ class RedisQueueDriver implements QueueDriverInterface
     {
         return Redis::lpop($queueName);
     }
+
+    public function getTheFirst($queueName): ?string
+    {
+        return Redis::lindex($queueName, 0);
+    }
 }

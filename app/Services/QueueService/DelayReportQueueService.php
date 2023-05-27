@@ -18,4 +18,9 @@ class DelayReportQueueService implements QueueServiceInterface
     {
         return json_decode($this->queueStrategy->dequeue($this->queueName));
     }
+
+    public function getFirst(): ?object
+    {
+        return json_decode($this->queueStrategy->getFirst($this->queueName));
+    }
 }

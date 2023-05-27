@@ -15,8 +15,13 @@ class FifoQueueStrategy implements QueueStrategyInterface
         return $this->queueDriver->enqueueAtTail($queueName, $data);
     }
 
-    public function dequeue($queue): ?string
+    public function dequeue($queueName): ?string
     {
-        return $this->queueDriver->dequeueTheFirst($queue);
+        return $this->queueDriver->dequeueTheFirst($queueName);
+    }
+
+    public function getFirst(string $queueName): ?string
+    {
+        return $this->getFirst($queueName);
     }
 }
