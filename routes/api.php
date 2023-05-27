@@ -17,5 +17,5 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->group(function() {
     Route::post('clients/delay-report/{order}', [OrderController::class, 'delayReport']);
-    Route::post('admin/assign-delay-report', [AgentOrderController::class]);
+    Route::post('admin/assign-delay-report', AgentOrderController::class);
 });

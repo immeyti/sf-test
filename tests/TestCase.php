@@ -45,4 +45,11 @@ abstract class TestCase extends BaseTestCase
             $mock->shouldReceive('dequeue')->once()->andReturn($returnValue);
         });
     }
+
+    protected function mockDelayReportQueueGetFirstMethod($returnValue)
+    {
+        return $this->mock(DelayReportQueueService::class, function (MockInterface $mock) use ($returnValue) {
+            $mock->shouldReceive('getFirst')->once()->andReturn($returnValue);
+        });
+    }
 }

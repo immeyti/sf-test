@@ -24,6 +24,6 @@ class DelayReport extends Model
             User::class,
             'delay_reports_agents',
             'delay_report_id',
-            'agent_id');
+            'agent_id')->withPivot('status');
     }
 }

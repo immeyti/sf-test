@@ -17,12 +17,12 @@ Route::get('/', function () {
 
 
 // Define our queue name
-    $queueName = 'fifo';
+    $queueName = 'delay-reports';
 
 // Put some items in our queue
 // You can run this code outside your long-running worker
 //    Redis::rpush($queueName, 'item1');
 //    Redis::rpush($queueName, json_encode(['order' => 'rer']));
 
-    dd(Redis::LRANGE($queueName, 0, -1), json_decode(Redis::lpop($queueName)));
+    dd(Redis::LRANGE($queueName, 0, -1));
 });

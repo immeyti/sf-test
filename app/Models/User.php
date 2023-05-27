@@ -51,6 +51,6 @@ class User extends Authenticatable
             DelayReport::class,
             'delay_reports_agents',
             'agent_id',
-            'delay_report_id');
+            'delay_report_id')->withPivot('status');
     }
 }
